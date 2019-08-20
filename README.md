@@ -1,2 +1,2 @@
-# the-general-public
-Write your story
+### Description
+You can write your story here, without worrying about personal privacy being leaked
