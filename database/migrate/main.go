@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	action := flag.String("action", "up", "select your action up/down")
+	action := flag.String("action", "up", "Select your action up/down")
+	steps := flag.Int("steps", 1, "Set the steps，default 1")
 	flag.Parse()
 
 	db, err := sql.Open("mysql", "root:wewin123@tcp(127.0.0.1:3306)/general_public?multiStatements=true")
@@ -37,12 +38,12 @@ func main() {
 
 	switch *action {
 	case "up":
-		if err := m.Up(); err != nil {
+		if err := m.Steps(*steps); err != nil {
 			fmt.Println("up action")
 			log.Fatal("An error occurred when sysncing the database, error: %v", err)
 		}
 	case "down":
-		if err := m.Down(); err != nil {
+		if err := m.Steps(-*steps); err != nil {
 			fmt.Println("down action")
 			log.Fatal("An error occurred when sysncing the database, error: %v", err)
 		}
