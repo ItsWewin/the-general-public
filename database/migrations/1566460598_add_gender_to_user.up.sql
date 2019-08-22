@@ -1,0 +1,2 @@
+ALTER TABLE user
+ADD COLUMN gender VARCHAR(15) AFTER name;

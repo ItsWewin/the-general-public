@@ -1,0 +1,1 @@
+create table user (name char, age int)
