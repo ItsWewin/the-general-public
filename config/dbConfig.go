@@ -1,7 +1,7 @@
 package config
 
 type dbConfig struct {
-	MigrationsFilePath string
+	MigrationsFilePath string `gpcofig:""`
 	Host string
 	Port uint16
 	DBName string
