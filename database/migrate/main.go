@@ -12,14 +12,18 @@ import (
 	"log"
 	"os"
 )
-var migrationsPath = config.DBConfig.MigrationsFilePath
+
+var dbConf = config.DBConfig
 
 func main() {
 	action := flag.String("action", "up", "Set your action up/down")
 	steps := flag.Int("steps", 1, "Set the steps，when you set the action 'down', you should set the steps")
 	flag.Parse()
 
-	db, err := sql.Open("mysql", "root:wewin123@tcp(127.0.0.1:3306)/general_public?multiStatements=true")
+	//dataSourceName  "root:wewin123@tcp(127.0.0.1:3306)/general_public?multiStatements=true"
+	dataSourceNmae := fmt.Sprintf("%v:%v@%v(%v:%v)/%v?multiStatements=true",
+								dbConf.UserName, dbConf.PassWord, dbConf.Protocol, dbConf.Host, dbConf.Port, dbConf.DBName)
+	db, err := sql.Open("mysql", dataSourceNmae)
 	if err != nil {
 		log.Fatal("Some error occurred when connect mysql, error: %v", err)
 	}
@@ -30,7 +34,7 @@ func main() {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		fmt.Sprintf("file://%v", migrationsPath),
+		fmt.Sprintf("file://%v", dbConf.MigrationsFilePath),
 		"mysql",
 		driver,
 	)
