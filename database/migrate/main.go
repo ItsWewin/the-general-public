@@ -10,11 +10,13 @@ import (
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"log"
+	"os"
 )
+var migrationsPath = config.DBConfig.MigrationsFilePath
 
 func main() {
-	action := flag.String("action", "up", "Select your action up/down")
-	steps := flag.Int("steps", 1, "Set the steps，default 1")
+	action := flag.String("action", "up", "Set your action up/down")
+	steps := flag.Int("steps", 1, "Set the steps，when you set the action 'down', you should set the steps")
 	flag.Parse()
 
 	db, err := sql.Open("mysql", "root:wewin123@tcp(127.0.0.1:3306)/general_public?multiStatements=true")
@@ -24,28 +26,35 @@ func main() {
 
 	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
-		log.Fatal("Some error occurred when instance, error: %v", err)
+		log.Fatalf("Some error occurred when instance, error: %v", err)
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		fmt.Sprintf("file://%v", config.DBConfig.MigrationsFilePath),
+		fmt.Sprintf("file://%v", migrationsPath),
 		"mysql",
 		driver,
 	)
 	if err != nil {
-		log.Fatal("Some error occurred when database instance, error: %v", err)
+		log.Fatalf("Some error occurred when database instance, error: %v", err)
 	}
 
 	switch *action {
 	case "up":
-		if err := m.Steps(*steps); err != nil {
-			fmt.Println("up action")
-			log.Fatal("An error occurred when sysncing the database, error: %v", err)
+		if err := m.Up(); err != nil {
+			if err.Error() == "no change" {
+				log.Println("All change have been migrated")
+				os.Exit(0)
+			} else {
+				log.Fatalf("An error occurred when sysncing the database, error: %v", err)
+			}
 		}
 	case "down":
 		if err := m.Steps(-*steps); err != nil {
-			fmt.Println("down action")
-			log.Fatal("An error occurred when sysncing the database, error: %v", err)
+			if err.Error() == "file does not exist" {
+				log.Fatal("Do not have any migration")
+			} else {
+				log.Fatalf("An error occurred when sysncing the database, error: %v", err)
+			}
 		}
 	default:
 		fmt.Printf("Unkown action, action must be 'up' or 'down'")
