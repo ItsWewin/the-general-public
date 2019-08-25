@@ -7,6 +7,6 @@ import (
 
 func Login(c *gin.Context) {
 	c.HTML(http.StatusOK, "session/login.tmpl", gin.H{
-		"title": "users",
+		"title": "Login",
 	})
 }
